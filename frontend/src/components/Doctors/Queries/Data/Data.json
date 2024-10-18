@@ -1,0 +1,33 @@
+[
+    {
+      "id": 1,
+      "name": "Shreyas Deshmukh",
+      "query": "1 Query",
+      "time": "2min ago"
+    },
+    {
+      "id": 2,
+      "name": "Rahul Kumar",
+      "query": "1 Query",
+      "time": "5min ago"
+    },
+    {
+      "id": 3,
+      "name": "Aisha Khan",
+      "query": "1 Query",
+      "time": "10min ago"
+    },
+    {
+      "id": 4,
+      "name": "Priya Sharma",
+      "query": "1 Query",
+      "time": "15min ago"
+    },
+    {
+      "id": 5,
+      "name": "John Doe",
+      "query": "1 Query",
+      "time": "20min ago"
+    }
+  ]
+  

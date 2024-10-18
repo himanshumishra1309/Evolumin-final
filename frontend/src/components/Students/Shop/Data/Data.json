@@ -1,0 +1,94 @@
+{
+  "medicines": [
+      {
+          "id": 1,
+          "title": "Paracetamol",
+          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6CpcIIM986_zgtGqTYB2ynEIvFr-yk43wFogELa4h3KVJ7kcfQIL5Nje8uz_HR_8GTOs&usqp=CAU",
+          "price": "163.18"
+      },
+      {
+          "id": 2,
+          "title": "Ibuprofen",
+          "image": "https://accessdoctor.co.uk/wp-content/uploads/2021/10/Ibuprofen-600mg.jpg",
+          "price": "204.18"
+      },
+      {
+          "id": 3,
+          "title": "Amoxicillin",
+          "image": "https://www.sanifyhealthcare.com/wp-content/uploads/2022/06/Xmonate-500-Tablets.jpg",
+          "price": "327.18"
+      },
+      {
+          "id": 4,
+          "title": "Aspirin",
+          "image": "https://5.imimg.com/data5/SELLER/Default/2023/6/315124897/VY/ZS/WV/185952854/aspirin-tablet-500-mg.jpg",
+          "price": "122.18"
+      },
+      {
+          "id": 5,
+          "title": "Cetirizine",
+          "image": "https://4.imimg.com/data4/MU/BW/MY-4092588/cetirizine-tablets.jpg",
+          "price": "245.18"
+      },
+      {
+          "id": 6,
+          "title": "Metformin",
+          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqdSqrMwgEQg5G8IYHrVHyMlfndq1dNBc1DQ&s",
+          "price": "409.18"
+      },
+      {
+          "id": 7,
+          "title": "Omeprazole",
+          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcReN3MJkWVoMfzju2XLuDnvsuzu9bD_McWxYw&s",
+          "price": "245.18"
+      },
+      {
+          "id": 8,
+          "title": "Ciprofloxacin",
+          "image": "https://cpimg.tistatic.com/06408703/b/4/Ciprofloxacin-Tablets-500-mg.jpg",
+          "price": "450.18"
+      },
+      {
+          "id": 9,
+          "title": "Hydrochlorothiazide",
+          "image": "https://www.loyalmedicosonline.com/product-images/216633_1.jpg/1083368000002300903/600x600",
+          "price": "286.18"
+      },
+      {
+          "id": 10,
+          "title": "Atorvastatin",
+          "image": "https://nestoronline.in/product_image/images/CHANGE/Screenshot%202022-07-29%20131439.png",
+          "price": "573.18"
+      },
+      {
+          "id": 11,
+          "title": "Lisinopril",
+          "image": "https://cpimg.tistatic.com/07373350/b/4/Lisinopril-10-mg-Tablet.jpg",
+          "price": "327.18"
+      },
+      {
+          "id": 12,
+          "title": "Amlodipine",
+          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTNh0giCkCmhYYoWjvEMIGgm3EBXTolWlveAA&s",
+          "price": "368.18"
+      },
+      {
+          "id": 13,
+          "title": "Metoprolol",
+          "image": "https://5.imimg.com/data5/SELLER/Default/2021/6/YS/CK/XP/74288016/metoprolol-tartrate-tablet.jpg",
+          "price": "409.18"
+      },
+      {
+          "id": 14,
+          "title": "Losartan",
+          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTIz-9G4OhWHJzkJ1H9jE494bQjn6N2ANK6vg&s",
+          "price": "450.18"
+      },
+      {
+          "id": 15,
+          "title": "Simvastatin",
+          "image": "https://5.imimg.com/data5/SELLER/Default/2021/2/MI/YX/MQ/3148278/simvastatin-20mg.jpeg",
+          "price": "532.18"
+      }
+  ]
+}

@@ -1,0 +1,39 @@
+[
+    {
+      "id": 1,
+      "name": "Primary Care Physician",
+      "query": "1 reply",
+      "time": "2min ago"
+    },
+    {
+      "id": 2,
+      "name": "Dentist",
+      "query": "1 reply",
+      "time": "5min ago"
+    },
+    {
+      "id": 3,
+      "name": "Psycologist",
+      "query": "1 reply",
+      "time": "10min ago"
+    },
+    {
+      "id": 4,
+      "name": "Dermatologist",
+      "query": "1 reply",
+      "time": "15min ago"
+    },
+    {
+      "id": 5,
+      "name": "Allergist",
+      "query": "1 reply",
+      "time": "20min ago"
+    },
+    {
+    "id": 5,
+    "name": "Physical Therapist",
+    "query": "1 reply",
+    "time": "20min ago"
+    }
+  ]
+  

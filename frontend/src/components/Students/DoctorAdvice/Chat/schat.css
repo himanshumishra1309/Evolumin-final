@@ -1,0 +1,119 @@
+.chatbox .chat {
+    display: flex;
+    list-style: none;
+    margin-bottom: 10px;
+    font-family: 'Kaisei HarunoUmi', sans-serif; 
+  }
+  
+  .chatbox .outgoing {
+    margin: 20px 0;
+    justify-content: flex-end;
+    font-family: 'Kaisei HarunoUmi', sans-serif; 
+  }
+  
+  .chatbox .incoming span {
+    width: 32px;
+    height: 32px;
+    color: #fff;
+    cursor: default;
+    text-align: center;
+    line-height: 32px;
+    align-self: flex-end;
+    background: #09b097;
+    border-radius: 4px;
+    margin: 0 10px 7px 7px;
+  }
+  
+  .chatbox .chat p {
+    white-space: pre-wrap;
+    padding: 12px 16px;
+    border-radius: 10px 10px 0 10px;
+    max-width: 75%;
+    color: #fff;
+    font-size: 0.95rem;
+    background: #09b097;
+    font-size: 25px;
+    overflow-wrap: break-word;
+    font-family: 'Kaisei HarunoUmi', sans-serif; 
+  }
+  
+  .chatbox .incoming p {
+    border-radius: 0 10px 10px 10px;
+    font-family: 'Kaisei HarunoUmi', sans-serif; 
+  }
+  
+  .chatbox .chat p.error {
+    color: #721c24;
+    background: #f8d7da;
+  }
+  
+  .chatbox .incoming p {
+    color: #000;
+    background: #f2f2f2;
+  }
+  
+  .pills-suggestion-enter {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  
+  .pills-suggestion-enter-active {
+    transform: translateX(0);
+    opacity: 1;
+    transition: transform 300ms ease-out, opacity 300ms ease-out;
+  }
+  
+  .pills-suggestion-exit {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  
+  .pills-suggestion-exit-active {
+    transform: translateX(100%);
+    opacity: 0;
+    transition: transform 300ms ease-out, opacity 300ms ease-out;
+  }
+  
+  .pills-suggestion-wrapper {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 80%;
+    max-width: 320px;
+    z-index: 1000;
+    background: white;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+  }
+
+  /* customScrollbar.css */
+.scrollbar-hide {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background: #555;
+    cursor: pointer;
+  }
+  

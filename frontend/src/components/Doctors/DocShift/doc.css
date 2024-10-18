@@ -1,0 +1,11 @@
+/* Add this to your CSS file */
+.highlight {
+    background-color: #ff8d3b; /* Yellow background */
+    border-radius: 40%;        /* Make it a circle */
+    color: black;              /* Optional: Set text color */
+}
+
+.highlight:hover{
+    background-color: #f4b88e;
+}
+  

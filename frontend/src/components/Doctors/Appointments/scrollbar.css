@@ -1,0 +1,30 @@
+/* customScrollbar.css */
+.scrollbar-hide {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 12px;
+    height: 4px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background: #555;
+    cursor: pointer;
+  }
+  
