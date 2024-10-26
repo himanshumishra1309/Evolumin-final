@@ -1,13 +1,74 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 function ShowAndPutAlerts({ onClose }) {
   const [alertMessage, setAlertMessage] = useState('');
-  const [messages, setMessages] = useState([]);
+  const [alerts, setAlerts] = useState([]);
 
-  const handleSendAlert = () => {
+  // Fetch alerts on component load
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const accessToken = sessionStorage.getItem('doctorAccessToken');
+        const headers = {
+          "Authorization": `Bearer ${accessToken}`
+        };
+        const response = await axios.get('http://localhost:7001/api/v1/alerts/alerts-doc', { headers });
+        console.log('Fetched Alerts doctor side:', response.data);
+        setAlerts(response.data.data);
+      } catch (error) {
+        console.error("Error fetching alerts:", error.response?.data?.message || error.message);
+      }
+    };
+    fetchAlerts();
+  }, []);
+  
+  const userId = sessionStorage.getItem('doctorId');
+  
+  // Send a new alert
+  const handleSendAlert = async () => {
     if (alertMessage.trim() !== '') {
-      setMessages([...messages, alertMessage]);
-      setAlertMessage(''); // Clear the input after sending the alert
+      try {
+        const accessToken = sessionStorage.getItem('doctorAccessToken');
+        const headers = {
+          "Authorization": `Bearer ${accessToken}`
+        };
+        const response = await axios.post(`http://localhost:7001/api/v1/alerts/doctors/${userId}/alert`, { message: alertMessage }, { headers });
+        console.log('Sent Alerts doctor side:', response.data);
+        setAlerts([response.data.data, ...alerts]);
+        setAlertMessage(''); // Clear the input
+      } catch (error) {
+        console.error("Error sending alert:", error.response?.data?.message || error.message);
+      }
+    }
+  };
+
+  // Edit an alert
+  const handleEditAlert = async (alertId, updatedMessage) => {
+    try {
+      const accessToken = sessionStorage.getItem('doctorAccessToken');
+        const headers = {
+          "Authorization": `Bearer ${accessToken}`
+        };
+      const response = await axios.put(`http://localhost:7001/api/v1/alerts/alerts/${alertId}`, { message: updatedMessage }, { headers });
+      console.log('Edited Alerts doctor side:', response.data);
+      setAlerts(alerts.map(alert => alert._id === alertId ? response.data.data : alert));
+    } catch (error) {
+      console.error("Error editing alert:", error.response?.data?.message || error.message);
+    }
+  };
+
+  // Delete an alert
+  const handleDeleteAlert = async (alertId) => {
+    try {
+      const accessToken = sessionStorage.getItem('doctorAccessToken');
+        const headers = {
+          "Authorization": `Bearer ${accessToken}`
+        };
+      await axios.delete(`http://localhost:7001/api/v1/alerts/alerts/${alertId}`, { headers });
+      setAlerts(alerts.filter(alert => alert._id !== alertId));
+    } catch (error) {
+      console.error("Error deleting alert:", error.response?.data?.message || error.message);
     }
   };
 
@@ -21,18 +82,45 @@ function ShowAndPutAlerts({ onClose }) {
         >
           &times;
         </button>
-        
+
         {/* Title */}
         <h3 className="text-2xl font-semibold mb-6 text-center">Alerts</h3>
 
         {/* Messages List */}
         <ul className="flex-grow overflow-y-auto mb-4 border p-4 rounded-lg h-2/3">
-          {messages.length === 0 ? (
+          {alerts.length === 0 ? (
             <p className="text-center text-gray-500">No Alerts Yet!</p>
           ) : (
-            messages.map((msg, index) => (
-              <li key={index} className="bg-gray-100 p-2 my-2 rounded-lg">
-                {msg}
+            alerts.map((alert) => (
+              <li key={alert._id} className="bg-gray-100 p-2 my-2 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-semibold">{alert.owner.name}</p>
+                    <p className="text-sm text-gray-500">{new Date(alert.createdAt).toLocaleString()}</p>
+                    <p>{alert.message}</p>
+                  </div>
+                  {alert.owner._id === userId && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          const updatedMessage = prompt("Edit your message:", alert.message);
+                          if (updatedMessage && updatedMessage !== alert.message) {
+                            handleEditAlert(alert._id, updatedMessage);
+                          }
+                        }}
+                        className="text-blue-500 hover:underline"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteAlert(alert._id)}
+                        className="text-red-500 hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
               </li>
             ))
           )}

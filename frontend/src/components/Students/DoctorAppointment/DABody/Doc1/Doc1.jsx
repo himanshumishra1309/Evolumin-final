@@ -1,23 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import doctorImage from '../../Images/doc1.jpg';
 import axios from 'axios';
-
-const availableDates = [
-    new Date(Date.UTC(2024, 8, 5)),
-    new Date(Date.UTC(2024, 8, 11)),
-    new Date(Date.UTC(2024, 8, 26)),
-    new Date(Date.UTC(2024, 8, 28)),
-];
-
-const availableTimes = [
-    '09:00',
-    '10:00',
-    '11:00',
-    '12:00',
-    '13:00',
-];
+import { format } from 'date-fns';
+import doctorImage from '../../Images/doc1.jpg';
 
 export default function Doc1() {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -27,36 +13,30 @@ export default function Doc1() {
   const [symptoms, setSymptoms] = useState('');
   const [doctorData, setDoctorData] = useState(null);
   const [error, setError] = useState(null);
+  const [bookedAppointment, setBookedAppointment] = useState(null);
 
   useEffect(() => {
     fetchDoctorData();
     fetchDoctorAvailability();
+    const storedAppointment = localStorage.getItem('bookedAppointment');
+    if (storedAppointment) {
+      setBookedAppointment(JSON.parse(storedAppointment));
+    }
   }, []);
-  
+
   const studentId = sessionStorage.getItem('studentId');
   const accessToken = sessionStorage.getItem('studentAccessToken');
-  
+
   const fetchDoctorData = async () => {
     try {
-      
       const response = await axios.get(`http://localhost:7001/api/v1/fetchDoctor/primary-care-physician/${studentId}`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'Accept': 'application/json'
         }
       });
-      
-      sessionStorage.setItem('primaryCarePhysician', response.data.message[0]._id)
-      // const primaryCarePhysician = response.data.message[0]._id;
-      // console.log(primaryCarePhysician);
-
-      console.log('Doctor experience:', response.data.message[0].experience);
-
-      if (response.status === 200 && response.headers['content-type'].includes('application/json')) {
-        setDoctorData(response.data.message[0]);  // store the first object in doctorData
-      } else {
-        throw new Error("Unexpected content type or response status");
-      }
+      sessionStorage.setItem('primaryCarePhysician', response.data.message[0]._id);
+      setDoctorData(response.data.message[0]);
     } catch (error) {
       setError(`Error fetching doctor data: ${error.message}`);
       console.error('Error details:', error);
@@ -66,16 +46,17 @@ export default function Doc1() {
   const fetchDoctorAvailability = async () => {
     try {
       const primaryCarePhysician = sessionStorage.getItem('primaryCarePhysician');
-      const response = await axios.get(`http://localhost:7001/api/v1/appointments/doctors/${primaryCarePhysician}/availability`,{
+      const response = await axios.get(`http://localhost:7001/api/v1/appointments/doctors/${primaryCarePhysician}/availability`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
-          // 'Accept': 'application/json'
         }
       });
-
-      console.log('dates response: ', response);
       if (response.status === 200 && response.data.success) {
-        setAvailableDates(response.data.data);
+        const formattedDates = response.data.data.map((date) => ({
+          ...date,
+          date: new Date(date.date).toISOString().split('T')[0],
+        }));
+        setAvailableDates(formattedDates);
       }
     } catch (error) {
       setError(`Error fetching availability: ${error.message}`);
@@ -83,21 +64,25 @@ export default function Doc1() {
   };
 
   const handleDateChange = (date) => {
-    setSelectedDate(date);
-    const formattedDate = date.toISOString().split('T')[0];
+    const formattedDate = format(date, 'yyyy-MM-dd');
+    setSelectedDate(new Date(formattedDate));
+    updateAvailableTimes(formattedDate);
+  };
+
+  const handleDropdownChange = (event) => {
+    const selectedDropdownDate = event.target.value;
+    setSelectedDate(new Date(selectedDropdownDate));
+    updateAvailableTimes(selectedDropdownDate);
+  };
+
+  const updateAvailableTimes = (formattedDate) => {
     const selectedDateData = availableDates.find(d => d.date === formattedDate);
     setAvailableTimes(selectedDateData ? selectedDateData.slots.filter(slot => !slot.isBooked) : []);
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    console.log('Booking appointment:', { selectedDate, selectedTime, symptoms });
-    // Implement appointment booking logic here
-  };
-
   const tileClassName = ({ date, view }) => {
     if (view === 'month') {
-      const formattedDate = date.toISOString().split('T')[0];
+      const formattedDate = format(date, 'yyyy-MM-dd');
       if (availableDates.some(d => d.date === formattedDate)) {
         return 'text-black font-bold text-2xl';
       }
@@ -106,11 +91,79 @@ export default function Doc1() {
     return null;
   };
 
-  if (error) {
+  const tileDisabled = ({ date, view }) => {
+    if (view === 'month') {
+      const formattedDate = format(date, 'yyyy-MM-dd');
+      return !availableDates.some(d => d.date === formattedDate);
+    }
+    return false;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedDate || !selectedTime || !symptoms) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    const [startTime, endTime] = selectedTime.split(' - ');
+    const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+
+    try {
+      const primaryCarePhysician = sessionStorage.getItem('primaryCarePhysician');
+      const response = await axios.post(
+        `http://localhost:7001/api/v1/appointments/doctors/${primaryCarePhysician}/book`,
+        {
+          studentId,
+          date: formattedDate,
+          startTime,
+          endTime,
+          symptoms
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.status === 201) {
+        const appointmentData = response.data.data;
+        setBookedAppointment(appointmentData);
+        localStorage.setItem('bookedAppointment', JSON.stringify(appointmentData));
+        setError(null);
+      }
+    } catch (error) {
+      setError(`Error booking appointment: ${error.response?.data?.message || error.message}`);
+    }
+  };
+
+  const handleCancelAppointment = async () => {
+    try {
+      // Implement the cancellation logic here
+      // For now, we'll just clear the local storage and state
+      localStorage.removeItem('bookedAppointment');
+      setBookedAppointment(null);
+    } catch (error) {
+      setError(`Error cancelling appointment: ${error.message}`);
+    }
+  };
+
+  if (bookedAppointment) {
     return (
-      <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-        <h2 className="text-lg font-bold mb-2">Error</h2>
-        <p>{error}</p>
+      <div className="p-10">
+        <h2 className="text-2xl font-bold mb-4">Your Booked Appointment</h2>
+        <p>Date: {bookedAppointment.date}</p>
+        <p>Time: {bookedAppointment.startTime} - {bookedAppointment.endTime}</p>
+        <p>Symptoms: {bookedAppointment.symptoms}</p>
+        <button
+          onClick={handleCancelAppointment}
+          className="mt-4 p-2 px-10 text-xl font-semibold bg-white text-black border border-red-600 hover:text-white rounded-xl hover:bg-red-700"
+        >
+          Cancel Appointment
+        </button>
+        <p className="mt-4">To modify your appointment, please contact the clinic directly.</p>
       </div>
     );
   }
@@ -126,17 +179,33 @@ export default function Doc1() {
         <div className="flex flex-col items-start mb-5">
           <h1 className="text-4xl flex items-baseline text-teal-800 mb-3">
             {doctorData?.name || 'Dr. Mahesh Joshi'}
-            <span className="text-lg text-teal-600 ml-2">{doctorData?.experience ? `(${doctorData.experience} experience)` : 'Experience not available'}</span>
+            <span className="text-lg text-teal-600 ml-2">
+              {doctorData?.experience ? `(${doctorData.experience} experience)` : 'Experience not available'}
+            </span>
           </h1>
           <form onSubmit={handleSubmit}>
             <label htmlFor="date" className="mt-2 block">Date</label>
+            <select
+              id="date"
+              value={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''}
+              onChange={handleDropdownChange}
+              className="mt-1 p-2 border border-gray-300 rounded w-full"
+              required
+            >
+              <option value="" disabled>Select a date</option>
+              {availableDates.map((date, index) => (
+                <option key={index} value={date.date}>
+                  {new Date(date.date).toDateString()}
+                </option>
+              ))}
+            </select>
             <Calendar
-              className="rounded-2xl font-bold"
+              className="rounded-2xl font-bold mt-4"
               onChange={handleDateChange}
               value={selectedDate}
               tileClassName={tileClassName}
+              tileDisabled={tileDisabled}
             />
-
             <label htmlFor="time" className="mt-4 block">Time</label>
             <select
               id="time"
@@ -147,12 +216,11 @@ export default function Doc1() {
             >
               <option value="" disabled>Select a time</option>
               {availableTimes.map((timeSlot, index) => (
-                <option key={index} value={timeSlot.startTime}>
+                <option key={index} value={`${timeSlot.startTime} - ${timeSlot.endTime}`}>
                   {`${timeSlot.startTime} - ${timeSlot.endTime}`}
                 </option>
               ))}
             </select>
-
             <label htmlFor="symptoms" className="mt-4 block">Symptoms</label>
             <input
               type="text"
@@ -166,9 +234,10 @@ export default function Doc1() {
               type="submit"
               className="mt-4 p-2 px-10 text-xl font-semibold bg-white text-black border border-teal-600 hover:text-white rounded-xl hover:bg-teal-700"
             >
-              Submit
+              Book Appointment
             </button>
           </form>
+          {error && <p className="text-red-500 mt-4">{error}</p>}
         </div>
       </div>
     </div>

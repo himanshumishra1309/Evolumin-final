@@ -14,7 +14,8 @@ const router = express.Router();
 router.post('/doctors/:doctorId/alert', verifyDoctorJWT, sendAlert);
 
 // Route for both doctors and students to view all alerts
-router.get('/alerts', [verifyDoctorJWT, verifyStudentJWT], viewAlerts);
+router.get('/alerts-doc', verifyDoctorJWT, viewAlerts);
+router.get('/alerts-stu', verifyStudentJWT, viewAlerts);
 
 // Route for a doctor to edit their own alert
 router.put('/alerts/:alertId', verifyDoctorJWT, editAlert);
