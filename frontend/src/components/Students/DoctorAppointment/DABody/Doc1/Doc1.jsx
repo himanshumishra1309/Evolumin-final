@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import doctorImage from '../../Images/doc1.jpg'; // Ensure the doctor image path is correct
-import DAHeader from '../../DAHeader/DAHeader';
+import doctorImage from '../../Images/doc1.jpg';
+import axios from 'axios';
 
 const availableDates = [
     new Date(Date.UTC(2024, 8, 5)),
-    new Date(Date.UTC(2024, 8, 11)), // July 6, 2024
-    new Date(Date.UTC(2024, 8, 26)), // July 13, 2024
-    new Date(Date.UTC(2024, 8, 28)), // July 20, 2024
+    new Date(Date.UTC(2024, 8, 11)),
+    new Date(Date.UTC(2024, 8, 26)),
+    new Date(Date.UTC(2024, 8, 28)),
 ];
 
 const availableTimes = [
@@ -19,78 +19,86 @@ const availableTimes = [
     '13:00',
 ];
 
-function Doc1() {
+export default function Doc1() {
   const [selectedDate, setSelectedDate] = useState(null);
+  const [availableDates, setAvailableDates] = useState([]);
+  const [availableTimes, setAvailableTimes] = useState([]);
   const [selectedTime, setSelectedTime] = useState('');
+  const [symptoms, setSymptoms] = useState('');
+  const [doctorData, setDoctorData] = useState(null);
+  const [error, setError] = useState(null);
 
-  const handleDateChange = (date) => {
-    const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    // console.log(date.getDate()); ---> 23 (the date we clicked on the callender)
-    // console.log(date.getMonth()); ---> 6
-    // console.log(date.getFullYear()); ---> 2024
-    // console.log(date); ---> Thu Jul 11 2024 00:00:00 GMT+0530 (India Standard Time)
-    // console.log(utcDate); ---> Thu Jul 11 2024 05:30:00 GMT+0530 (India Standard Time)
-    // console.log(utcDate.toDateString()); ---> Thu Jul 11 2024
-    // console.log(date.getFullYear(), date.getMonth(), date.getDate()); ---> 2024 6 11
-    // console.log(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())); ---> 1720656000000
-    // Date.UTC(2024, 6, 5) ---> 1720137600000
-    // new Date(Date.UTC(2024, 6, 5)) ---> Fri Jul 05 2024 05:30:00 GMT+0530 (India Standard Time)
-    // new Date(Date.UTC(2024, 6, 5)).toDateString() ---> 'Fri Jul 05 2024'
-    if (availableDates.some((availableDate) => availableDate.toDateString() === utcDate.toDateString())) {
-      setSelectedDate(utcDate);
-    } else {
-      alert('Doctor is not available on this date');
+  useEffect(() => {
+    fetchDoctorData();
+    fetchDoctorAvailability();
+  }, []);
+  
+  const studentId = sessionStorage.getItem('studentId');
+  const accessToken = sessionStorage.getItem('studentAccessToken');
+  
+  const fetchDoctorData = async () => {
+    try {
+      
+      const response = await axios.get(`http://localhost:7001/api/v1/fetchDoctor/primary-care-physician/${studentId}`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Accept': 'application/json'
+        }
+      });
+      
+      sessionStorage.setItem('primaryCarePhysician', response.data.message[0]._id)
+      // const primaryCarePhysician = response.data.message[0]._id;
+      // console.log(primaryCarePhysician);
+
+      console.log('Doctor experience:', response.data.message[0].experience);
+
+      if (response.status === 200 && response.headers['content-type'].includes('application/json')) {
+        setDoctorData(response.data.message[0]);  // store the first object in doctorData
+      } else {
+        throw new Error("Unexpected content type or response status");
+      }
+    } catch (error) {
+      setError(`Error fetching doctor data: ${error.message}`);
+      console.error('Error details:', error);
     }
   };
 
-  const handleDateSelect = (event) => {
-    // console.log(event.target.value); ---> 2024-07-11
-    const date = new Date(event.target.value);
-    // date ---> Thu Jan 01 1970 05:30:02 GMT+0530 (India Standard Time)
-    const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    setSelectedDate(utcDate);
+  const fetchDoctorAvailability = async () => {
+    try {
+      const primaryCarePhysician = sessionStorage.getItem('primaryCarePhysician');
+      const response = await axios.get(`http://localhost:7001/api/v1/appointments/doctors/${primaryCarePhysician}/availability`,{
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          // 'Accept': 'application/json'
+        }
+      });
+
+      console.log('dates response: ', response);
+      if (response.status === 200 && response.data.success) {
+        setAvailableDates(response.data.data);
+      }
+    } catch (error) {
+      setError(`Error fetching availability: ${error.message}`);
+    }
   };
 
-  const handleTimeSelect = (event) => {
-    setSelectedTime(event.target.value);
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    const formattedDate = date.toISOString().split('T')[0];
+    const selectedDateData = availableDates.find(d => d.date === formattedDate);
+    setAvailableTimes(selectedDateData ? selectedDateData.slots.filter(slot => !slot.isBooked) : []);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    console.log('Booking appointment:', { selectedDate, selectedTime, symptoms });
+    // Implement appointment booking logic here
   };
 
   const tileClassName = ({ date, view }) => {
-    // console.log({ date, view });
-    {/*
-    
-      1] when the view is of normal calender that is when we can view the month of july this is the object that we get:
-      
-          {date: Fri Nov 01 2024 00:00:00 GMT+0530 (India Standard Time), view: 'month'}
-          date: Fri Nov 01 2024 00:00:00 GMT+0530 (India Standard Time) {}
-          view:"month"
-          [[Prototype]]: Object
-
-      2] when the view is of all the months in the calender that is when we click on the month's name we get to see the current year in that place and all the months appear there instead of date, then the value will be:
-      
-          {date: Fri Nov 01 2024 00:00:00 GMT+0530 (India Standard Time), view: 'year'}
-          date: Fri Nov 01 2024 00:00:00 GMT+0530 (India Standard Time) {}
-          view:"year"
-          [[Prototype]]: Object
-
-      3] when the view is of 10 years in the calender that is when we click on the year we get to see 2021-2030 in that place and all the years between them appears there instead of date, then the value will be:
-      
-          {date: Fri Nov 01 2024 00:00:00 GMT+0530 (India Standard Time), view: 'decade'}
-          date: Fri Nov 01 2024 00:00:00 GMT+0530 (India Standard Time) {}
-          view:"decade"
-          [[Prototype]]: Object
-
-      4] when the view is of 10 years sets in the calender that is when we click on the year we get to see 2001-2100 in that place and all the years between them appears there instead of date, then the value will be:
-      
-          {date: Fri Nov 01 2024 00:00:00 GMT+0530 (India Standard Time), view: 'century'}
-          date: Fri Nov 01 2024 00:00:00 GMT+0530 (India Standard Time) {}
-          view:"century"
-          [[Prototype]]: Object
-
-    */}
     if (view === 'month') {
-      const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-      if (availableDates.some((availableDate) => availableDate.toDateString() === utcDate.toDateString())) {
+      const formattedDate = date.toISOString().split('T')[0];
+      if (availableDates.some(d => d.date === formattedDate)) {
         return 'text-black font-bold text-2xl';
       }
       return 'text-gray-300';
@@ -98,89 +106,71 @@ function Doc1() {
     return null;
   };
 
+  if (error) {
+    return (
+      <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+        <h2 className="text-lg font-bold mb-2">Error</h2>
+        <p>{error}</p>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <div className='p-10'>
-        <div className='flex gap-20 items-center justify-center'>
-          <div className='flex flex-col items-center'>
-            <img src={doctorImage} className='size-80 rounded-2xl'/>
-            <p>M.B.B.S in PCP</p>
-            <p>(AIIMS Delhi)</p>
-          </div>
-          <div className="flex flex-col items-start mb-5">
-            <h1 className='text-4xl flex items-baseline text-teal-800 mb-3' style={{ fontFamily: 'Kaisei HarunoUmi, sans-serif' }}>Dr. Mahesh Joshi<p className='text-lg text-teal-600' style={{ fontFamily: 'Kaisei HarunoUmi, sans-serif' }}>(IRIS HOSPITAL)</p></h1>
-            <label htmlFor="date" className="mt-2">Date</label>
+    <div className="p-10">
+      <div className="flex gap-20 items-center justify-center">
+        <div className="flex flex-col items-center">
+          <img src={doctorImage} alt="Doctor" className="w-80 h-80 rounded-2xl" />
+          <p>{doctorData?.qualification || 'M.B.B.S in PCP'}</p>
+          <p>{doctorData?.currently_working || '(AIIMS Delhi)'}</p>
+        </div>
+        <div className="flex flex-col items-start mb-5">
+          <h1 className="text-4xl flex items-baseline text-teal-800 mb-3">
+            {doctorData?.name || 'Dr. Mahesh Joshi'}
+            <span className="text-lg text-teal-600 ml-2">{doctorData?.experience ? `(${doctorData.experience} experience)` : 'Experience not available'}</span>
+          </h1>
+          <form onSubmit={handleSubmit}>
+            <label htmlFor="date" className="mt-2 block">Date</label>
+            <Calendar
+              className="rounded-2xl font-bold"
+              onChange={handleDateChange}
+              value={selectedDate}
+              tileClassName={tileClassName}
+            />
+
+            <label htmlFor="time" className="mt-4 block">Time</label>
             <select
-              id="date"
-              value={selectedDate ? selectedDate.toISOString().split('T')[0] : ''}
-              onChange={handleDateSelect}
-              className="mt-1 p-2 border border-gray-300 rounded w-1/2"
+              id="time"
+              value={selectedTime}
+              onChange={(e) => setSelectedTime(e.target.value)}
+              className="mt-1 p-2 border border-gray-300 rounded w-full"
+              required
             >
-              <option value="" disabled>Select a date</option>
-              {availableDates.map((date, index) => (
-                <option key={index} value={date.toISOString().split('T')[0]}>
-                  {date.toDateString()}
+              <option value="" disabled>Select a time</option>
+              {availableTimes.map((timeSlot, index) => (
+                <option key={index} value={timeSlot.startTime}>
+                  {`${timeSlot.startTime} - ${timeSlot.endTime}`}
                 </option>
               ))}
             </select>
 
-            {/*
-            
-              1] date.toISOString() ---> '2024-07-24T00:00:00.000Z'
-
-              2] date.toISOString().split('T'):
-                (2) ['2024-07-24', '00:00:00.000Z']
-                0: "2024-07-24"
-                1: "00:00:00.000Z"
-                length: 2
-                [[Prototype]]: Array(0)
-                
-              3] date.toISOString().split('T')[0]:
-                "2024-07-24"
-
-              4] {date.toDateString()}:
-                  day month date year(this is the format)
-
-            */}
-
-            <label htmlFor="time" className="mt-4">Time</label>
-            <select
-              id="time"
-              value={selectedTime}
-              onChange={handleTimeSelect}
-              className="mt-1 p-2 border border-gray-300 rounded w-1/2"
-            >
-              <option value="" disabled>Select a time</option>
-              {availableTimes.map((time, index) => (
-                <option key={index} value={time}>{time}</option>
-              ))}
-            </select>
-
-            <label htmlFor="symptoms" className="mt-4">Symptoms</label>
+            <label htmlFor="symptoms" className="mt-4 block">Symptoms</label>
             <input
               type="text"
               id="symptoms"
-              className="mt-1 p-2 border border-gray-300 rounded w-1/2"
+              value={symptoms}
+              onChange={(e) => setSymptoms(e.target.value)}
+              className="mt-1 p-2 border border-gray-300 rounded w-full"
+              required
             />
             <button
               type="submit"
-              className="mt-4 p-2 px-10 text-xl font-semibold bg-white text-black border-teal-600 hover:text-white rounded-xl hover:bg-teal-700"
+              className="mt-4 p-2 px-10 text-xl font-semibold bg-white text-black border border-teal-600 hover:text-white rounded-xl hover:bg-teal-700"
             >
               Submit
             </button>
-          </div>
-          <div className="">
-            <Calendar
-              className={`rounded-2xl font-bold`}
-              onChange={handleDateChange}
-              value={selectedDate}
-              tileClassName={tileClassName}
-              />
-        </div>
+          </form>
         </div>
       </div>
     </div>
-  )
+  );
 }
-
-export default Doc1

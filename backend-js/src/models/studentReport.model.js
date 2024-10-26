@@ -7,16 +7,16 @@ const reportSchema = new Schema(
         required: true,
         trim: true,
     },
+    email:{
+        type: String,
+        required: true,
+    },
     age:{
         type: Number,
         required: true,
     },
     dob:{
         type: Date,
-        required: true,
-    },
-    contact:{
-        type: Number,
         required: true,
     },
     blood_group:{
@@ -35,6 +35,10 @@ const reportSchema = new Schema(
         type: String,
         required: true,
     },
+    date:{
+        type: Date,
+        required: true, 
+    }
 },
 { timestamps: true });
 
