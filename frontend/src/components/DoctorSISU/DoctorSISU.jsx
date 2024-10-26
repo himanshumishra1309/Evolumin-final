@@ -12,10 +12,13 @@ function DoctorSISU() {
   const [signupData, setSignupData] = useState({
     name: '',
     email: '',
+    speciality: '',
     qualification: '',
     experience: '',
+    currently_working: '',
     password: '',
   });
+  
   const [loginData, setLoginData] = useState({
     email: '',
     password: ''
@@ -82,7 +85,13 @@ const handleContinue = (event) =>{
   const handleSignUpSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/api/v1/doctors/register', signupData);
+      const response = await axios.post(`http://localhost:7001/api/v1/doctors/register`, signupData);
+      const accessToken = response?.data?.data?.accessToken;
+      const doctorId = response?.data?.data?.user?._id;
+    
+      // Store user-specific data in sessionStorage
+      sessionStorage.setItem('doctorAccessToken', accessToken);
+      sessionStorage.setItem('doctorId', doctorId);
       navigate('/doc');
     } catch (error) {
       console.error('Error during signup:', error);
@@ -91,20 +100,26 @@ const handleContinue = (event) =>{
   };
   
 
-const handleLoginSubmit = async (e) => {
-  e.preventDefault();
-  try {
-      const response = await axios.post('/api/v1/doctors/login', loginData);
-      console.log("Login response:", response.data);  // Add this to see what you get
-      navigate('/doc');  // Redirect to profile page
-  } catch (error) {
-      if (error.response) {
-          console.error('Error during login:', error.response.data); // Capture error message from backend
-      } else {
-          console.error('Error during login:', error.message); // Capture other errors
-      }
-  }
-};
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    try {
+        const response = await axios.post(`http://localhost:7001/api/v1/doctors/login`, loginData);
+        console.log({response})
+        const accessToken = response?.data?.data?.accessToken;
+        const doctorId = response?.data?.data?.user?._id;
+              
+        // Store user-specific data in sessionStorage
+        sessionStorage.setItem('doctorAccessToken', accessToken);
+        sessionStorage.setItem('doctorId', doctorId);
+        navigate('/doc');  // Redirect to profile page
+    } catch (error) {
+        if (error.response) {
+            console.error('Error during login:', error.response.data); // Capture error message from backend
+        } else {
+            console.error('Error during login:', error.message); // Capture other errors
+        }
+    }
+  };
 
   return (
     <div className='w-full h-full flex flex-col justify-center items-center bg-slate-50'>
@@ -113,11 +128,22 @@ const handleLoginSubmit = async (e) => {
           <div className="sign-up">
             <form onSubmit={handleSignUpSubmit}>
               <p className='mb-4'>Sign Up</p>
-              <input className='border mb-2 p-2' id="name" type="text" placeholder="Name*" value={signupData.name} onChange={handleSignupChange} required />
-              <input className='border mb-2 p-2' id="email" type="email" placeholder="Email*" value={signupData.email} onChange={handleSignupChange} required />
-              <input className='border mb-2 p-2' id="qualification" type="text" placeholder="Qualification*" value={signupData.qualification} onChange={handleSignupChange} required />
-              <input className='border mb-2 p-2' id="experience" type="text" placeholder="Experience*" value={signupData.experience} onChange={handleSignupChange} required />
-              <input className='border mb-2 p-2' id="password" type="password" placeholder="Password*" value={signupData.password} onChange={handleSignupChange} required />
+              <input className='border mb-2 p-2 bg-gray-200' id="name" type="text" placeholder="Name*" value={signupData.name} onChange={handleSignupChange} required />
+              <input className='border mb-2 p-2 bg-gray-200' id="email" type="email" placeholder="Email*" value={signupData.email} onChange={handleSignupChange} required />
+              <select
+                className='border mb-2 p-2 bg-gray-200 w-full' id="speciality" value={signupData.speciality} onChange={handleSignupChange} required>
+                <option value="" disabled>Select Speciality*</option>
+                <option value="Primary Care Physician">Primary Care Physician</option>
+                <option value="Dentist">Dentist</option>
+                <option value="Psychologist">Psychologist</option>
+                <option value="Dermatologist">Dermatologist</option>
+                <option value="Allergist">Allergist</option>
+                <option value="Physical Therapist">Physical Therapist</option>
+              </select>
+              <input className='border mb-2 p-2 bg-gray-200' id="qualification" type="text" placeholder="Qualification*" value={signupData.qualification} onChange={handleSignupChange} required />
+              <input className='border mb-2 p-2 bg-gray-200' id="experience" type="text" placeholder="Experience*" value={signupData.experience} onChange={handleSignupChange} required />
+              <input className='border mb-2 p-2 bg-gray-200' id="currently_working" type="text" placeholder="Currently Working*" value={signupData.currently_working} onChange={handleSignupChange} required />
+              <input className='border mb-2 p-2 bg-gray-200' id="password" type="password" placeholder="Password*" value={signupData.password} onChange={handleSignupChange} required />
               <button className="button pt-2 pb-2 pl-4 pr-4 w-2/4 bg-teal-500 text-white m-2 font-semibold hover:bg-teal-400">Sign Up</button>
             </form>
           </div>
@@ -125,8 +151,8 @@ const handleLoginSubmit = async (e) => {
           <div className="sign-in">
             <form onSubmit={handleLoginSubmit}>
               <p className='mb-4'>Sign In</p>
-              <input className='border mb-2 p-2' type="email-login" id="email" placeholder="Email" value={loginData.email} onChange={handleLoginChange} required />
-              <input className='border mb-2 p-2' type="Password" id="password" placeholder="Password" value={loginData.password} onChange={handleLoginChange} required />
+              <input className='border mb-2 p-2 bg-gray-200' type="email-login" id="email" placeholder="Email" value={loginData.email} onChange={handleLoginChange} required />
+              <input className='border mb-2 p-2 bg-gray-200' type="Password" id="password" placeholder="Password" value={loginData.password} onChange={handleLoginChange} required />
               <button className="button pt-2 pb-2 pl-4 pr-4 w-2/4 bg-teal-500 text-white m-2 font-semibold hover:bg-teal-400">Sign In</button>
             </form>
           </div>

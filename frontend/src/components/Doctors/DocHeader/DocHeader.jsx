@@ -16,7 +16,8 @@ import ShowAndPutAlerts from '../ShowAndPutAlerts/ShowAndPutAlerts';
 
 export default function DocHeader({
   scrollToAppointments,
-  scrollToQueries
+  scrollToQueries,
+  scrollToCheckup,
 }) {
   const [activeSection, setActiveSection] = useState('');
   const [profileCard, setProfileCard] = useState(false);
@@ -118,6 +119,14 @@ export default function DocHeader({
                 <button
                   className='border-none'
                   onClick={scrollToQueries}
+                >
+                  <img src={queries} className='size-16' alt="Queries icon" />
+                </button>
+              </li>
+              <li>
+                <button
+                  className='border-none'
+                  onClick={scrollToCheckup}
                 >
                   <img src={queries} className='size-16' alt="Queries icon" />
                 </button>

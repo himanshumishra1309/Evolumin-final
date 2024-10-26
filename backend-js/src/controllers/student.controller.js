@@ -23,15 +23,14 @@ const generateAccessAndRefreshToken = async(userId) => {
 }
 
 
-
 const registerUser = asyncHandler(async (req,res) => {
 
-    const {roll_no, email, name, password, year, hostel, room_no} = req.body;
+    const {roll_no, email, dob, name, password, academic_year, hostel, room_no} = req.body;
     console.log('email: ', email);
     console.log('req.body: ', req.body);
 
   
-    if([email, name, password, roll_no, year, hostel, room_no].some((field) => field?.trim() === "")){
+    if([email, name, password, dob, roll_no, academic_year, hostel, room_no].some((field) => field?.trim() === "")){
         throw new ApiError(400, "fullname is required");
     }
 
@@ -44,8 +43,9 @@ const registerUser = asyncHandler(async (req,res) => {
     const user = await Student.create({
         name: name,
         email,
+        dob,
         roll_no, 
-        year, 
+        academic_year, 
         hostel, 
         room_no,
         password
@@ -69,7 +69,7 @@ const registerUser = asyncHandler(async (req,res) => {
     .cookie("studentAccessToken", accessToken, options)
     .cookie("studentRefreshToken", refreshToken, options)
     .json(
-        new ApiResponse(200, createdUser, "User Registered Successfully")
+        new ApiResponse(200, {user:createdUser, accessToken, refreshToken}, "User Registered Successfully")
     )
 }) 
 
@@ -121,7 +121,7 @@ const loginUser = asyncHandler(async(req, res)=>{
 })
 
 const logoutUser = asyncHandler(async(req, res)=>{
-  Student.findByIdAndUpdate(
+  await Student.findByIdAndUpdate(
     req.user._id,
     
     {
@@ -208,31 +208,43 @@ const getCurrentUser = asyncHandler(async (req, res)=>{
   return res.status(200).json(new ApiResponse(200, req.user, "current user fetched successfully"))
 })
 
-const updateAccountDetails = asyncHandler(async (req, res)=>{
-  console.log("req.body of update account details: ",req.body);
-  const {name, email, roll_no, room_no, hostel, year} = req.body;
+const updateAccountDetails = asyncHandler(async (req, res) => {
+  console.log("req.body of update account details: ", req.body);
+  
+  // Destructure the required fields from the request body
+  const { name, email, roll_no, room_no, hostel, academic_year, dob } = req.body;
 
-  if(!name || !email || !roll_no || !room_no || !hostel || !year){
-    throw new ApiError(400, "All field are requires")
+  // Check if all required fields are provided
+  if (!name || !email || !roll_no || !room_no || !hostel || !academic_year || !dob) {
+    throw new ApiError(400, "All fields are required");
   }
 
+  // Update the student's details in the database
   const user = await Student.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
         name,
-        email: email,
-        roll_no, 
-        year, 
-        hostel, 
-        room_no
-      }
+        email,
+        roll_no,
+        academic_year, // Ensure academic_year is used instead of year
+        hostel,
+        room_no,
+        dob, // Include dob field in the update
+      },
     },
-    {new: true} 
-  ).select("-password")
+    { new: true } // Return the updated document
+  ).select("-password"); // Exclude the password from the response
 
-  return res.status(200).json(new ApiResponse(200, user, "Account details updated successfully"))
-}) 
+  // Check if the user was found and updated
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // Respond with the updated user data
+  return res.status(200).json(new ApiResponse(200, user, "Account details updated successfully"));
+});
+
 
 
 export {registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails}

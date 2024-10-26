@@ -17,13 +17,17 @@ const studentSchema = new Schema(
             lowercase: true,
             trim: true,
         },
+        dob:{
+            type: Date,
+            required: true,
+        },
         roll_no: {
             type: String,
             required: true,
             trim: true,
             index: true,
         },
-        year:{
+        academic_year:{
             type: String,
             required: true,
             trim: true,

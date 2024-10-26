@@ -23,12 +23,12 @@ const generateAccessAndRefreshToken = async(userId) => {
 
 const registerUser = asyncHandler(async (req,res) => {
     
-    const {name, email, qualification, experience, password} = req.body;
+    const {name, email, speciality, qualification, experience, currently_working, password} = req.body;
     console.log('email: ', email);
     console.log('req.body: ', req.body);
 
 
-    if([email, name, password, qualification, experience].some((field) => field?.trim() === "")){
+    if([email, name, password,speciality, qualification, experience, currently_working].some((field) => field?.trim() === "")){
         throw new ApiError(400, "Every detail is required");
     }
 
@@ -42,8 +42,10 @@ const registerUser = asyncHandler(async (req,res) => {
     const user = await Doctor.create({
         name: name,
         email,
+        speciality,
         qualification, 
         experience,
+        currently_working,
         password
     })
 
@@ -65,14 +67,17 @@ const registerUser = asyncHandler(async (req,res) => {
     .cookie("doctorAccessToken", accessToken, options)
     .cookie("doctorRefreshToken", refreshToken, options)
     .json(
-        new ApiResponse(200, createdUser, "User Registered Successfully")
-    )
+      new ApiResponse(200, {
+        user: createdUser,
+        accessToken: accessToken
+      }, "User Registered Successfully")
+  )
 }) 
 
 const loginUser = asyncHandler(async(req, res)=>{
 
-    console.log("request : ", req);
-    console.log("request's body : ", req.body);
+    // console.log("request : ", req);
+    // console.log("request's body : ", req.body);
     const {email, password} = req.body;
 
     
@@ -203,7 +208,7 @@ const changeCurrentPassword = asyncHandler(async (req, res)=>{
 }) 
 
 const getCurrentUser = asyncHandler(async (req, res)=>{
-  return res.status(200).json(new ApiResponse(200, req.user, "current user fetched successfully"))
+  return res.status(200).json(new ApiResponse(200, req.user2, "current user fetched successfully"))
 })
 
 const updateAccountDetails = asyncHandler(async (req, res)=>{

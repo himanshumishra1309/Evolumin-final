@@ -12,8 +12,9 @@ function StudentSISU() {
     const [signupData, setSignupData] = useState({
         name: '',
         email: '',
+        dob: '',
         roll_no: '',
-        year: '',
+        academic_year: '',
         hostel: '',
         room_no: '',
         password: '',
@@ -71,7 +72,13 @@ function StudentSISU() {
     const handleSignUpSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('/api/v1/students/register', signupData);
+            const response = await axios.post('http://localhost:7001/api/v1/students/register', signupData);
+            const accessToken = response?.data?.data?.accessToken;
+            const studentId = response?.data?.data?.user?._id;
+            
+            // Store user-specific data in sessionStorage
+            sessionStorage.setItem('studentAccessToken', accessToken);
+            sessionStorage.setItem('studentId', studentId);
             navigate('/app/pcp');
         } catch (error) {
             alert('Error during signup:', error);
@@ -82,8 +89,13 @@ function StudentSISU() {
     const handleLoginSubmit = async (e) =>{
         e.preventDefault();
         try {
-            const response = await axios.post('/api/v1/students/login', loginData);
-            localStorage.setItem('studentId', response.data.id);
+            const response = await axios.post('http://localhost:7001/api/v1/students/login', loginData);
+            const accessToken = response?.data?.data?.accessToken;
+            const studentId = response?.data?.data?.user?._id;
+    
+            // Store user-specific data in sessionStorage
+            sessionStorage.setItem('studentAccessToken', accessToken);
+            sessionStorage.setItem('studentId', studentId);
             navigate('/app/pcp');
         } catch (error) {
             console.error('Error during signup:', error);
@@ -104,15 +116,16 @@ function StudentSISU() {
             <div className='w-full flex justify-center items-center'>
                 <div className="container w-1/2" id="main">
                     <div className="sign-up">
-                        <form onSubmit={handleSignUpSubmit}>
+                    <form onSubmit={handleSignUpSubmit}>
                             <p className='mb-4'>Register</p>
-                            <input className='border mb-2 p-2' id="name" type="text" placeholder="Name*" required value={signupData.name} onChange={handleSignUpChange}></input>
-                            <input className='border mb-2 p-2' id="email" type="email" placeholder="Email*" required value={signupData.email} onChange={handleSignUpChange}></input>
-                            <input className='border mb-2 p-2' id="roll_no" type="text" placeholder="Roll_No*" required value={signupData.roll_no} onChange={handleSignUpChange}></input>
-                            <input className='border mb-2 p-2' id="year" type="text" placeholder="Year*" required value={signupData.year} onChange={handleSignUpChange}></input>
-                            <input className='border mb-2 p-2' id="hostel" type="text" placeholder="hostel-name*" required value={signupData.hostel} onChange={handleSignUpChange}></input>
-                            <input className='border mb-2 p-2' id="room_no" type="number" placeholder="room-number*" required value={signupData.room_no} onChange={handleSignUpChange}></input>
-                            <input className='border mb-2 p-2' id="password" type="password" placeholder="Password*" required value={signupData.password} onChange={handleSignUpChange}></input>
+                            <input className='border mb-2 p-2' id="name" type="text" placeholder="Name*" required value={signupData.name} onChange={handleSignUpChange} />
+                            <input className='border mb-2 p-2' id="email" type="email" placeholder="Email*" required value={signupData.email} onChange={handleSignUpChange} />
+                            <input className='border mb-2 p-2' id="dob" type="date" placeholder="Date of Birth*" required value={signupData.dob} onChange={handleSignUpChange} />
+                            <input className='border mb-2 p-2' id="roll_no" type="text" placeholder="Roll No*" required value={signupData.roll_no} onChange={handleSignUpChange} />
+                            <input className='border mb-2 p-2' id="academic_year" type="text" placeholder="Academic Year*" required value={signupData.academic_year} onChange={handleSignUpChange} />
+                            <input className='border mb-2 p-2' id="hostel" type="text" placeholder="Hostel*" required value={signupData.hostel} onChange={handleSignUpChange} />
+                            <input className='border mb-2 p-2' id="room_no" type="text" placeholder="Room Number*" required value={signupData.room_no} onChange={handleSignUpChange} />
+                            <input className='border mb-2 p-2' id="password" type="password" placeholder="Password*" required value={signupData.password} onChange={handleSignUpChange} />
                             <button className="button pt-2 pb-2 pl-4 pr-4 w-2/4 bg-teal-500 text-white m-2 font-semibold hover:bg-teal-400">Sign Up</button>
                         </form>
                     </div>

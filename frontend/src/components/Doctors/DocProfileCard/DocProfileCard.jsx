@@ -8,8 +8,10 @@ const DocProfileCard = () => {
   const [profileData, setProfileData] = useState({
     name: "",
     email: '',
+    speciality: '',
     experience: '',
-    qualification: ''
+    qualification: '',
+    currently_working: '',
   });
   const [isLoading, setIsLoading] = useState(true); // Loading state
 
@@ -17,15 +19,22 @@ const DocProfileCard = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get('/api/v1/doctors/current-user');
+        const accessToken = sessionStorage.getItem('doctorAccessToken');
+
+        const headers= {
+          "Authorization": `Bearer ${accessToken}`
+        };
+        const response = await axios.get('http://localhost:7001/api/v1/doctors/current-user', { headers });
         console.log('Fetched Profile:', response.data);
   
         // Update profile data state
         setProfileData({
           name: response.data.data.name || '',
           email: response.data.data.email || '',
+          speciality: response.data.data.speciality || '', // Corrected typo
           experience: response.data.data.experience || '',
-          qualification: response.data.data.qualification || ''
+          qualification: response.data.data.qualification || '',
+          currently_working: response.data.data.currently_working || '' // Added currently_working
         });
   
       } catch (error) {
@@ -57,24 +66,33 @@ const DocProfileCard = () => {
   // Function to update profile data
 const handleSave = async () => {
   try {
-    const response = await axios.patch('/api/v1/doctors/update-account', {
+    const accessToken = sessionStorage.getItem('doctorAccessToken');
+
+    const headers= {
+      "Authorization": `Bearer ${accessToken}`
+    };
+    const response = await axios.patch('http://localhost:7001/api/v1/doctors/update-account', {
       name: profileData.name,
       email: profileData.email,
+      speciality: profileData.speciality || '', // Corrected typo
       experience: profileData.experience || '',
-      qualification: profileData.qualification || ''
-    });
+      qualification: profileData.qualification || '',
+      currently_working: profileData.currently_working || '' // Added currently_working
+    }, { headers });
     if (response.status === 200) {
       alert('Profile updated successfully.');
       setIsEditing(false);
 
       // Re-fetch profile data after update
-      const updatedResponse = await axios.get('/api/v1/doctors/current-user');
+      const updatedResponse = await axios.get('http://localhost:7001/api/v1/doctors/current-user', { headers });
       const updatedData = updatedResponse.data;
       setProfileData({
         name: updatedData.data.name || '',
         email: updatedData.data.email || '',
+        speciality: updatedData.data.speciality || '',
         experience: updatedData.data.experience || '',
-        qualification: updatedData.data.qualification || ''
+        qualification: updatedData.data.qualification || '',
+        currently_working: updatedData.data.currently_working || ''
       });
     } else {
       alert('Failed to update profile. Please try again.');
@@ -111,7 +129,7 @@ const handleSave = async () => {
   }
 
   return (
-    <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+    <div className="w-1/2 mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
       <div className="pt-3 pb-3">
         <div className="flex justify-center mb-4">
           <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
@@ -141,7 +159,7 @@ const handleSave = async () => {
           )}
         </h2>
         <form className="w-full">
-          {['email', 'qualification', 'experience'].map((field, index) => (
+          {['email','speciality', 'qualification', 'experience', 'currently_working'].map((field, index) => (
             <div key={index} className="w-full mb-4 flex items-center justify-between">
               <label
                 htmlFor={field}

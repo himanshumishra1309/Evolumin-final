@@ -1,6 +1,8 @@
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { FaPassport, FaPen, FaSave } from 'react-icons/fa';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css"; 
 import './loading.css'
 
 const ProfileCard = () => {
@@ -8,27 +10,42 @@ const ProfileCard = () => {
   const [profileData, setProfileData] = useState({
     name: '',
     email: '',
+    dob: '',
     roll_no: '',
-    year: '',
+    academic_year: '',
     hostel:'',
     room_no: '',
   });
   const [isLoading, setIsLoading] = useState(true); 
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };  
   
   // Fetch the profile data from the backend
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get('/api/v1/students/current-user');
+        // Get access token from sessionStorage
+        const accessToken = sessionStorage.getItem('studentAccessToken');
+
+        const headers = {
+            "Authorization": `Bearer ${accessToken}`
+        };
+        const response = await axios.get('http://localhost:7001/api/v1/students/current-user', { headers });
         console.log('Fetched Profile:', response.data);
   
         // Update profile data state
         setProfileData({
           name: response.data.data.name || '',
           email: response.data.data.email || '',
+          dob: formatDate(response.data.data.dob) || '', 
           roll_no: response.data.data.roll_no || '',
-          year: response.data.data.year || '',
+          academic_year: response.data.data.academic_year || '',
           hostel: response.data.data.hostel || '',
           room_no: response.data.data.room_no || '',
         });
@@ -60,31 +77,51 @@ const ProfileCard = () => {
     });
   };
 
+  const handleDateChange = (date) => {
+    // Format the date to DD-MM-YYYY format before setting it in state
+    if (date) {
+      const formattedDate = formatDate(date);
+      setProfileData({ ...profileData, dob: formattedDate });
+    } else {
+      setProfileData({ ...profileData, dob: '' });
+    }
+  };
+
 
 // Function to update profile data
 const handleSave = async () => {
   try {
-    const response = await axios.patch('/api/v1/students/update-account', {
+    const accessToken = sessionStorage.getItem('studentAccessToken');
+    // console.log({userInfo});
+    const headers = {
+      "Authorization": `Bearer ${accessToken}`
+    }
+    // Convert the dob back to ISO format before sending
+    const [day, month, year] = profileData.dob.split('-');
+    const dobISO = new Date(`${year}-${month}-${day}T00:00:00Z`).toISOString();
+    const response = await axios.patch('http://localhost:7001/api/v1/students/update-account', {
       name: profileData.name,
       email: profileData.email,
+      dob: dobISO,
       roll_no: profileData.roll_no,
-      year: profileData.year,
+      academic_year: profileData.academic_year,
       room_no: profileData.room_no,
       hostel: profileData.hostel,   // Include this if it's required by your API
       _id: profileData._id          // If the API expects an ID
-    });
+    }, { headers });
     if (response.status === 200) {
       alert('Profile updated successfully.');
       setIsEditing(false);
 
       // Re-fetch profile data after update
-      const updatedResponse = await axios.get('/api/v1/students/current-user');
+      const updatedResponse = await axios.get('http://localhost:7001/api/v1/students/current-user', { headers });
       const updatedData = updatedResponse.data;
       setProfileData({
         name: updatedData.data.name || '',
         email: updatedData.data.email || '',
+        dob: formatDate(updatedData.data.dob) || '',
         roll_no: updatedData.data.roll_no || '',
-        year: updatedData.data.year || '',
+        academic_year: updatedData.data.academic_year || '',
         hostel: updatedData.data.hostel || '',
         room_no: updatedData.data.room_no || '',
       });
@@ -122,7 +159,7 @@ const handleSave = async () => {
   }
 
   return (
-    <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+    <div className="w-2/5 mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
       <div className="pt-3 pb-3">
         <div className="flex justify-center mb-4">
           <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
@@ -151,7 +188,7 @@ const handleSave = async () => {
           )}
         </h2>
         <form className="w-full">
-          {['email', 'roll_no', 'year', 'hostel', 'room_no'].map((field, index) => (
+          {['email', 'roll_no', 'academic_year', 'hostel', 'room_no'].map((field, index) => (
             <div key={index} className="w-full mb-4 flex items-center justify-between">
               <label
                 htmlFor={field}
@@ -179,29 +216,55 @@ const handleSave = async () => {
               </div>
             </div>
           ))}
+          <div className="w-full mb-4 flex items-center justify-between">
+            <label
+              htmlFor="dob"
+              className="block text-start text-lg font-medium text-blue-800 w-1/3"
+              style={{ fontFamily: 'Kaisei HarunoUmi, sans-serif' }}
+            >
+              Date of Birth:
+            </label>
+            <div className="relative mt-1 flex items-center w-2/3">
+              <DatePicker
+                selected={profileData.dob ? new Date(profileData.dob.split('-').reverse().join('-')) : null}
+                onChange={handleDateChange}
+                dateFormat="dd-MM-yyyy"
+                className="w-full py-1 px-2 text-lg border-b-2 border-black focus:outline-none focus:ring-0"
+                readOnly={!isEditing}
+                placeholderText="Select Date"
+              />
+            </div>
+          </div>
+          <div className="flex justify-center mt-4">
+            {isEditing ? (
+              <button
+                type="button"
+                onClick={handleSave}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+              >
+                <FaSave className="inline mr-1" />
+                Save
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleEdit}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+              >
+                <FaPen className="inline mr-1" />
+                Edit
+              </button>
+            )}
+          </div>
         </form>
-        <div className="flex justify-center mt-4">
-          {isEditing ? (
-            <button
-              type="button"
-              className="py-2 px-4 bg-green-600 text-white rounded-full flex items-center hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-              onClick={handleSave}
-            >
-              <FaSave className="mr-2" /> Save
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="py-2 px-4 bg-blue-600 text-white rounded-full flex items-center hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              onClick={handleEdit}
-            >
-              <FaPen className="mr-2" /> Edit
-            </button>
-          )}
-        </div>
       </div>
     </div>
   );
+};
+
+// Helper function to capitalize field labels
+const capitalizeLabel = (label) => {
+  return label.charAt(0).toUpperCase() + label.slice(1).replace('_', ' ');
 };
 
 export default ProfileCard;

@@ -7,7 +7,6 @@ const doctorSchema = new Schema(
         name: {
             type: String,
             required: true,
-            lowercase: true,
             trim: true,
             index: true,
         },
@@ -18,6 +17,11 @@ const doctorSchema = new Schema(
             lowercase: true,
             trim: true,
         },
+        speciality: {
+            type: String,
+            required: true,
+            trim: true,
+        },
         qualification: {
             type: String,
             required: true,
@@ -25,6 +29,12 @@ const doctorSchema = new Schema(
             index: true,
         },
         experience:{
+            type: String,
+            required: true,
+            trim: true,
+            index: true,
+        },
+        currently_working:{
             type: String,
             required: true,
             trim: true,
