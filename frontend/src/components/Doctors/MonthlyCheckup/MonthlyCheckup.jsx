@@ -1,12 +1,42 @@
+<<<<<<< HEAD
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X } from 'lucide-react';
+=======
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+>>>>>>> 70b00599a845ed28718be138db21fabfd6f92994
 import ReportForm from '../../Students/ReportForm/ReportForm';
 
 const MonthlyCheckup = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const response = await axios.get('http://localhost:7001/api/v1/students/all-students', {
+          headers: {
+            'Authorization': `Bearer ${sessionStorage.getItem('doctorAccessToken')}`
+          }
+        });
+        setStudents(response.data.data);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch students. Please try again later.');
+        setLoading(false);
+      }
+    };
+
+    fetchStudents();
+    
+  }, []);
+
+  console.log(students);
 
   const handleSearch = (e) => setSearchTerm(e.target.value);
   const handleOpenPopup = (student) => {
@@ -15,14 +45,25 @@ const MonthlyCheckup = () => {
   };
   const handleClosePopup = () => setShowPopup(false);
 
+<<<<<<< HEAD
   const students = [
     { name: 'John Doe', rollNo: 'CSE001', year: '2nd' },
     { name: 'Jane Smith', rollNo: 'ECE045', year: '3rd' },
   ];
 
+=======
+>>>>>>> 70b00599a845ed28718be138db21fabfd6f92994
   const filteredStudents = students.filter(student =>
     student.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (loading) {
+    return <div className="text-center mt-8">Loading students...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center mt-8 text-red-500">{error}</div>;
+  }
 
   return (
     <motion.div
@@ -52,6 +93,7 @@ const MonthlyCheckup = () => {
         transition={{ duration: 0.5, delay: 0.2 }}
       >
         {filteredStudents.map((student, index) => (
+<<<<<<< HEAD
           <motion.div
             key={index}
             whileHover={{ scale: 1.03 }}
@@ -61,6 +103,12 @@ const MonthlyCheckup = () => {
             <h3 className="text-xl font-semibold mb-2">{student.name}</h3>
             <p className="text-gray-600 mb-1">Roll No: {student.rollNo}</p>
             <p className="text-gray-600 mb-4">Year: {student.year}</p>
+=======
+          <div key={index} className="student-card p-4 rounded-lg shadow-lg bg-white">
+            <h3 className="text-xl font-semibold">{student.name}</h3>
+            <p className="text-gray-600">Roll No: {student.roll_no}</p>
+            <p className="text-gray-600">Year: {student.academic_year}</p>
+>>>>>>> 70b00599a845ed28718be138db21fabfd6f92994
             <button
               onClick={() => handleOpenPopup(student)}
               className="w-full py-2 px-4 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors duration-200"

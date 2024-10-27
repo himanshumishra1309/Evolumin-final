@@ -245,6 +245,14 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, user, "Account details updated successfully"));
 });
 
+const fetchAllStudents = asyncHandler(async (req, res) => {
+  const students = await Student.find({}).select("-password -refreshToken");
 
+  if (!students || students.length === 0) {
+    throw new ApiError(404, "No students found");
+  }
 
-export {registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails}
+  return res.status(200).json(new ApiResponse(200, students, "All students fetched successfully"));
+});
+
+export {registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails, fetchAllStudents}
