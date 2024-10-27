@@ -1,10 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import ReportForm from '../../Students/ReportForm/ReportForm';
 
 const MonthlyCheckup = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const response = await axios.get('http://localhost:7001/api/v1/students/all-students', {
+          headers: {
+            'Authorization': `Bearer ${sessionStorage.getItem('doctorAccessToken')}`
+          }
+        });
+        setStudents(response.data.data);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch students. Please try again later.');
+        setLoading(false);
+      }
+    };
+
+    fetchStudents();
+    
+  }, []);
+
+  console.log(students);
 
   const handleSearch = (e) => setSearchTerm(e.target.value);
   const handleOpenPopup = (student) => {
@@ -13,15 +39,17 @@ const MonthlyCheckup = () => {
   };
   const handleClosePopup = () => setShowPopup(false);
 
-  const students = [
-    // Sample data
-    { name: 'John Doe', rollNo: 'CSE001', year: '2nd' },
-    { name: 'Jane Smith', rollNo: 'ECE045', year: '3rd' },
-  ];
-
   const filteredStudents = students.filter(student =>
     student.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (loading) {
+    return <div className="text-center mt-8">Loading students...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center mt-8 text-red-500">{error}</div>;
+  }
 
   return (
     <div className="monthly-checkup border p-10">
@@ -37,8 +65,8 @@ const MonthlyCheckup = () => {
         {filteredStudents.map((student, index) => (
           <div key={index} className="student-card p-4 rounded-lg shadow-lg bg-white">
             <h3 className="text-xl font-semibold">{student.name}</h3>
-            <p className="text-gray-600">Roll No: {student.rollNo}</p>
-            <p className="text-gray-600">Year: {student.year}</p>
+            <p className="text-gray-600">Roll No: {student.roll_no}</p>
+            <p className="text-gray-600">Year: {student.academic_year}</p>
             <button
               onClick={() => handleOpenPopup(student)}
               className="fill-details-button mt-4 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
