@@ -13,6 +13,7 @@ import Popup from '../../Popup/Popup';
 import TrackAmb from '../../DoctorSISU/TrackAmb/TrackAmb';
 import alerts from '../../../svgs/alerts.svg'
 import ShowAndPutAlerts from '../ShowAndPutAlerts/ShowAndPutAlerts';
+import checkUp from '../../../svgs/checkup.svg';
 
 export default function DocHeader({
   scrollToAppointments,
@@ -128,7 +129,7 @@ export default function DocHeader({
                   className='border-none'
                   onClick={scrollToCheckup}
                 >
-                  <img src={queries} className='size-16' alt="Queries icon" />
+                  <img src={checkUp} className='size-20' alt="Queries icon" />
                 </button>
               </li>
               <li>

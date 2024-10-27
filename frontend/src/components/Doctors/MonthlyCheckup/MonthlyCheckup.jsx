@@ -2,7 +2,7 @@ import React, { useState , useEffect} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X } from 'lucide-react';
 import axios from 'axios';
-import ReportForm from '../../Students/ReportForm/ReportForm';
+import ReportForm from '../MonthlyCheckup/Report';
 
 const MonthlyCheckup = () => {
   const [searchTerm, setSearchTerm] = useState('');

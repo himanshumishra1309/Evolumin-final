@@ -6,19 +6,21 @@ import { Student } from "../models/student.model.js";
 
 // Helper function to verify the existence of the student by email
 const verifyStudentByEmail = async (email) => {
-  const student = await Student.findOne({ email });
-  if (!student) {
-    throw new ApiError(404, "Student not found.");
-  }
-  return student;
-};
+    console.log('Searching for student with email:', email); // Debug log
+    const student = await Student.findOne({ email: email.trim().toLowerCase() });
+    console.log('Found student:', student); // Debug log
+    if (!student) {
+      throw new ApiError(404, "Student not found.");
+    }
+    return student;
+  };
 
 // 1. Controller for doctor to add a report
-export const addReport = asyncHandler(async (req, res) => {
+const addReport = asyncHandler(async (req, res) => {
   const { email } = req.params;
-  const { name, age, dob, blood_group, medications, allergies, diseases } = req.body;
+  const { name, dob, blood_group, medications, allergies, diseases } = req.body;
 
-  if ([name, email, age, dob, blood_group, medications, allergies, diseases].some((field) => field?.trim() === "")) {
+  if ([name, email, dob, blood_group, medications, allergies, diseases].some((field) => field?.trim() === "")) {
     throw new ApiError(400, "All fields are required");
   }
 
@@ -27,7 +29,6 @@ export const addReport = asyncHandler(async (req, res) => {
   const report = await Report.create({
     name,
     email,
-    age,
     dob,
     blood_group,
     medications,
@@ -40,7 +41,7 @@ export const addReport = asyncHandler(async (req, res) => {
 });
 
 // 2. Controller for doctor to view all reports of a student
-export const getAllReports = asyncHandler(async (req, res) => {
+const getAllReports = asyncHandler(async (req, res) => {
   const { email } = req.params;
 
   await verifyStudentByEmail(email);
@@ -53,8 +54,36 @@ export const getAllReports = asyncHandler(async (req, res) => {
   res.json(new ApiResponse(200,  reports, "All reports retrieved successfully"));
 });
 
+
+const getLatestReportByDoctor = asyncHandler(async (req, res) => {
+    const { studentEmail } = req.params;
+  
+    // Verify if the student exists
+    const student = await Student.findOne({ email: studentEmail });
+    if (!student) {
+      throw new ApiError(404, "Student not found");
+    }
+  
+    // Find the latest report for the student
+    const latestReport = await Report.findOne({ email: studentEmail })
+      .sort({ date: -1 })
+      .lean();
+  
+    if (!latestReport) {
+      return res.status(404).json(
+        new ApiResponse(404, null, "No report found for this student")
+      );
+    }
+  
+    // Return the latest report
+    return res.status(200).json(
+      new ApiResponse(200, latestReport, "Latest report retrieved successfully")
+    );
+});
+  
+
 // 3. Controller for doctor to edit the latest report of a student
-export const editLatestReport = asyncHandler(async (req, res) => {
+const editLatestReport = asyncHandler(async (req, res) => {
     const { email } = req.params;
     const updates = req.body;
   
@@ -78,7 +107,7 @@ export const editLatestReport = asyncHandler(async (req, res) => {
 });
 
 // 4. Controller for student to view their latest monthly report
-export const getLatestReport = asyncHandler(async (req, res) => {
+const getLatestReport = asyncHandler(async (req, res) => {
   const { email } = req.params;
 
   await verifyStudentByEmail(email);
@@ -92,7 +121,7 @@ export const getLatestReport = asyncHandler(async (req, res) => {
 });
 
 // 5. Controller for student to view all past reports at once
-export const getAllPastReports = asyncHandler(async (req, res) => {
+const getAllPastReports = asyncHandler(async (req, res) => {
     const { email } = req.params;
   
     await verifyStudentByEmail(email);
@@ -104,3 +133,5 @@ export const getAllPastReports = asyncHandler(async (req, res) => {
   
     return res.status(200).json(new ApiResponse(200, pastReports, "All past reports retrieved successfully"));
 });
+
+export { addReport, getAllReports, editLatestReport, getLatestReport, getAllPastReports, getLatestReportByDoctor };

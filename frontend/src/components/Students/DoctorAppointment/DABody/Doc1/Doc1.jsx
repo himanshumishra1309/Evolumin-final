@@ -65,16 +65,49 @@ export default function Doc1() {
     }
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     
     if (selectedDate && selectedTime && symptoms) {
-      // Add form submission logic, e.g., sending data to the backend
-      console.log("Form Submitted:", {
-        date: selectedDate,
-        time: selectedTime,
-        symptoms,
-      });
+      try {
+        const primaryCarePhysician = sessionStorage.getItem('primaryCarePhysician');
+        const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+        const selectedTimeSlot = availableTimes.find(slot => slot.startTime === selectedTime);
+        
+        if (!selectedTimeSlot) {
+          throw new Error('Invalid time slot selected');
+        }
+
+        const response = await axios.post(
+          `http://localhost:7001/api/v1/appointments/doctors/${primaryCarePhysician}/book`,
+          {
+            studentId,
+            date: formattedDate,
+            startTime: selectedTimeSlot.startTime,
+            endTime: selectedTimeSlot.endTime,
+            symptoms
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (response.status === 201) {
+          setBookedAppointment(response.data.data);
+          localStorage.setItem('bookedAppointment', JSON.stringify(response.data.data));
+          alert('Appointment booked successfully!');
+          // Reset form fields
+          setSelectedDate(null);
+          setSelectedTime('');
+          setSymptoms('');
+        }
+      } catch (error) {
+        setError(`Error booking appointment: ${error.message}`);
+        console.error('Error details:', error);
+      }
     } else {
       alert("Please fill out all fields.");
     }

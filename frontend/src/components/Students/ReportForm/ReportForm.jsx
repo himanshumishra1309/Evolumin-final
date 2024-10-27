@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { FaPen, FaSave, FaExclamationTriangle } from 'react-icons/fa';
+import { FaExclamationTriangle } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
 
-const ReportForm = ({ student }) => {
-  const [isEditing, setIsEditing] = useState(false);
+const ReportForm = ({ studentEmail }) => {
   const [formData, setFormData] = useState({
-    name: student?.name || '',
-    age: '',
-    dateOfBirth: '',
+    name: '',
+    email: '',
+    dob: '',
     contactNumber: '',
-    bloodGroup: '',
+    blood_group: '',
     medications: '',
     allergies: '',
     diseases: '',
@@ -17,31 +17,35 @@ const ReportForm = ({ student }) => {
   const [showWarning, setShowWarning] = useState(false);
 
   useEffect(() => {
-    // Retrieve saved form data if available, or initialize with student props
-    const savedFormData = JSON.parse(localStorage.getItem('formData'));
-    if (savedFormData) {
-      setFormData(savedFormData);
-    } else if (student) {
-      setFormData(prevData => ({ ...prevData, name: student.name }));
-    }
-  }, [student]);
+    const fetchLatestReport = async () => {
+      try {
+        const token = sessionStorage.getItem('studentAccessToken');
+        const studentEmail = sessionStorage.getItem('studentEmail');
+        const response = await axios.get(`http://localhost:7001/api/v1/reports/students/${studentEmail}/report`, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach token from session storage
+          },
+        });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
+        if (response.status === 200) {
+          const reportData = response.data.data;
+          setFormData({
+            name: reportData.name || '',
+            email: reportData.email || '',
+            dob: reportData.dob || '',
+            blood_group: reportData.blood_group || '',
+            medications: reportData.medications || '',
+            allergies: reportData.allergies || '',
+            diseases: reportData.diseases || '',
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching report:', error);
+      }
+    };
 
-  const handleSave = () => {
-    localStorage.setItem('formData', JSON.stringify(formData));
-    setIsEditing(false);
-    setShowWarning(true);
-    setTimeout(() => setShowWarning(false), 3000);
-  };
-
-  const handleEdit = () => setIsEditing(true);
+    fetchLatestReport();
+  }, [studentEmail]);
 
   const capitalizeLabel = (label) => {
     return label
@@ -80,7 +84,7 @@ const ReportForm = ({ student }) => {
                   className="block text-start text-lg font-medium text-blue-800 w-1/3" 
                   style={{ fontFamily: 'Kaisei HarunoUmi, sans-serif' }}
                 >
-                  {capitalizeLabel(field)}:
+                  {capitalizeLabel(field.replace('_', ' '))}:
                 </label>
                 <div className="relative mt-1 flex items-center w-2/3">
                   <motion.input
@@ -88,59 +92,18 @@ const ReportForm = ({ student }) => {
                     id={field}
                     name={field}
                     value={formData[field]}
-                    onChange={handleInputChange}
-                    readOnly={!isEditing}
-                    className={`w-full py-1 px-2 text-base rounded-md transition-all duration-300 ease-in-out ${
-                      isEditing 
-                        ? 'border-2 border-blue-500 shadow-sm' 
-                        : 'border border-gray-300'
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    readOnly={true}
+                    className="w-full py-1 px-2 text-base rounded-md border border-gray-300 focus:outline-none"
                     style={{ 
                       fontFamily: 'Kaisei HarunoUmi, sans-serif', 
-                      color: isEditing ? '#000' : '#6B7280',
-                      backgroundColor: isEditing ? 'white' : '#F3F4F6',
+                      color: '#6B7280',
+                      backgroundColor: '#F3F4F6',
                     }}
-                    whileFocus={{ scale: 1.02 }}
                   />
                 </div>
               </motion.div>
             ))}
           </form>
-          <motion.div 
-            className="flex justify-center w-full mt-4"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <AnimatePresence>
-              {isEditing ? (
-                <motion.button
-                  key="save"
-                  type="button"
-                  className="py-2 px-4 bg-green-600 text-white text-base rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-md"
-                  onClick={handleSave}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <FaSave className="inline mr-2" /> Save Changes
-                </motion.button>
-              ) : (
-                <motion.button
-                  key="edit"
-                  type="button"
-                  className="py-2 px-4 bg-blue-600 text-white text-base rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-md"
-                  onClick={handleEdit}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <FaPen className="inline mr-2" /> Edit Report
-                </motion.button>
-              )}
-            </AnimatePresence>
-          </motion.div>
         </motion.div>
       </div>
       <AnimatePresence>
