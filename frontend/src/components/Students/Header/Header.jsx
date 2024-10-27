@@ -153,6 +153,7 @@ export default function Header({
                 <button
                   id='ambulance'
                   onClick={handleAmbulanceClick}
+                  data-tour="call-ambulance"
                   className='bg-red-500 w-auto p-2 text-white flex items-center justify-center gap-5 text-xl'
                 >
                   {buttonText } <FaAmbulance className='size-7'/>
@@ -161,7 +162,7 @@ export default function Header({
               <li className="relative">
                 <img onClick={toggleCard} src={account} className="h-16 w-16 cursor-pointer" alt="Account" />
                 {profileCard && (
-                  <div id="profile-overlay" className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
+                  <div id="profile-overlay" className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10" data-tour="profile-access">
                     <ProfileCard />
                   </div>
                 )}
