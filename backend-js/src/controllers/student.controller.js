@@ -25,12 +25,12 @@ const generateAccessAndRefreshToken = async(userId) => {
 
 const registerUser = asyncHandler(async (req,res) => {
 
-    const {roll_no, email, dob, name, password, academic_year, hostel, room_no} = req.body;
+    const {roll_no, email, dob, name, password, academic_year, hostel, room_no, branch, contact_no} = req.body;
     console.log('email: ', email);
     console.log('req.body: ', req.body);
 
   
-    if([email, name, password, dob, roll_no, academic_year, hostel, room_no].some((field) => field?.trim() === "")){
+    if([email, name, password, dob, roll_no, academic_year, hostel, room_no, branch, contact_no].some((field) => field?.trim() === "")){
         throw new ApiError(400, "fullname is required");
     }
 
@@ -46,8 +46,10 @@ const registerUser = asyncHandler(async (req,res) => {
         dob,
         roll_no, 
         academic_year, 
+        branch,
         hostel, 
         room_no,
+        contact_no,
         password
     })
 

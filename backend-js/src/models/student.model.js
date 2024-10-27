@@ -33,6 +33,12 @@ const studentSchema = new Schema(
             trim: true,
             index: true,
         },
+        branch:{
+            type: String,
+            required: true,
+            trim: true,
+            index: true,
+        },
         hostel:{
             type: String,
             required: true,
@@ -40,6 +46,12 @@ const studentSchema = new Schema(
             index: true,
         },
         room_no:{
+            type: String,
+            required: true,
+            trim: true,
+            index: true,
+        },
+        contact_no:{
             type: String,
             required: true,
             trim: true,

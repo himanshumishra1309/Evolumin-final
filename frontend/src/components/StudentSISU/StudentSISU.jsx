@@ -15,8 +15,10 @@ function StudentSISU() {
         dob: '',
         roll_no: '',
         academic_year: '',
+        branch: '',
         hostel: '',
         room_no: '',
+        contact_no: '',
         password: '',
     });
     const [loginData, setLoginData] = useState({
@@ -115,7 +117,7 @@ function StudentSISU() {
         <div className='w-full h-full flex flex-col justify-center items-center'>
             <div className='w-full flex justify-center items-center'>
                 <div className="container w-1/2" id="main">
-                    <div className="sign-up">
+                    <div className="sign-up overflow-y-scroll pt-10">
                     <form onSubmit={handleSignUpSubmit}>
                             <p className='mb-4'>Register</p>
                             <input className='border mb-2 p-2' id="name" type="text" placeholder="Name*" required value={signupData.name} onChange={handleSignUpChange} />
@@ -123,8 +125,10 @@ function StudentSISU() {
                             <input className='border mb-2 p-2' id="dob" type="date" placeholder="Date of Birth*" required value={signupData.dob} onChange={handleSignUpChange} />
                             <input className='border mb-2 p-2' id="roll_no" type="text" placeholder="Roll No*" required value={signupData.roll_no} onChange={handleSignUpChange} />
                             <input className='border mb-2 p-2' id="academic_year" type="text" placeholder="Academic Year*" required value={signupData.academic_year} onChange={handleSignUpChange} />
+                            <input className='border mb-2 p-2' id="branch" type="text" placeholder="Branch*" required value={signupData.branch} onChange={handleSignUpChange} />
                             <input className='border mb-2 p-2' id="hostel" type="text" placeholder="Hostel*" required value={signupData.hostel} onChange={handleSignUpChange} />
                             <input className='border mb-2 p-2' id="room_no" type="text" placeholder="Room Number*" required value={signupData.room_no} onChange={handleSignUpChange} />
+                            <input className='border mb-2 p-2' id="contact_no" type="text" placeholder="Contact Number*" required value={signupData.contact_no} onChange={handleSignUpChange} />
                             <input className='border mb-2 p-2' id="password" type="password" placeholder="Password*" required value={signupData.password} onChange={handleSignUpChange} />
                             <button className="button pt-2 pb-2 pl-4 pr-4 w-2/4 bg-teal-500 text-white m-2 font-semibold hover:bg-teal-400">Sign Up</button>
                         </form>

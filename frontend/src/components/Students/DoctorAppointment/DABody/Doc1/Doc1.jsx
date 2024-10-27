@@ -81,7 +81,7 @@ export default function Doc1() {
   };
 
   const handleDateChange = (date) => {
-    const selectedDateString = date.toISOString().split('T')[0];
+    const selectedDateString = format(date, 'yyyy-MM-dd');
     const isDateAvailable = availableDates.some((dateObj) => dateObj.date === selectedDateString);
 
     if (isDateAvailable) {
@@ -146,7 +146,7 @@ export default function Doc1() {
           <h1 className="text-4xl text-teal-800 font-bold mb-3" style={{ fontFamily: 'Kaisei HarunoUmi, sans-serif' }}>
             {doctorData?.name || 'Dr. Mahesh Joshi'}
             <span className="text-lg text-teal-600 ml-2" style={{ fontFamily: 'Kaisei HarunoUmi, sans-serif' }}>
-              {doctorData?.experience ? `(${doctorData.experience} years experience)` : 'Experience not available'}
+              {doctorData?.experience ? `(${doctorData.experience} experience)` : 'Experience not available'}
             </span>
           </h1>
           

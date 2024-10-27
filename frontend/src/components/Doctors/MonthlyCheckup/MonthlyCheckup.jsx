@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X } from 'lucide-react';
+import axios from 'axios';
 import ReportForm from '../../Students/ReportForm/ReportForm';
 
 const MonthlyCheckup = () => {
@@ -80,7 +81,7 @@ const MonthlyCheckup = () => {
         transition={{ duration: 0.5, delay: 0.2 }}
       >
         {filteredStudents.map((student, index) => (
-          <div key={index} className="student-card p-4 rounded-lg shadow-lg bg-white">
+          <motion.div key={index} className="student-card p-4 rounded-lg shadow-lg bg-white">
             <h3 className="text-xl font-semibold">{student.name}</h3>
             <p className="text-gray-600">Roll No: {student.roll_no}</p>
             <p className="text-gray-600">Year: {student.academic_year}</p>
