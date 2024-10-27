@@ -29,30 +29,44 @@ Frontend:
 React.js, Tailwind CSS
 
 
+
 Backend: 
 Node.js, Express.js, MongoDB, Mongoose
+
 
 
 Mobile App: 
 React Native (for ambulance tracking)
 
+
+
 Real-time Communication: 
 SocketIO (for chat functionality)
+
+
 
 Authentication and privacy: 
 JWT (JSON Web Token) and bcrypt
 
 
+
+
 Styling: 
 Tailwind CSS, ShadCN components
 
+
+
 Project Setup
 To get the project up and running locally, follow these steps:
+
+
 
 1.	Clone the repository:
 bash
 Copy code
 git clone “paste http url of our repo”
+
+
 
 1] Setup Frontend (VS CODE):
 
@@ -62,7 +76,11 @@ npm install
 
 npm run dev
 
+
+
 2] Setup Backend (VS CODE):
+
+
 
 --> First Folder
 
@@ -71,6 +89,8 @@ cd backend-js
 npm install
 
 npm run dev
+
+
 
 
 --> Chat Server
@@ -82,17 +102,29 @@ npm install
 npm start
 
 
+
+
 For student frontend login with: 
 
 Email: himanshu@gmail.com
 
 Password: 1234
 
+
+
 For doctor frontend login with:
 
 Email: maheshjoshi@gmail.com
 
 Password: 1234
+
+
+
+TO SEE THE CHAT FEATURE WORK:
+
+FROM DOCTOR'S SDE OPEN "HIMANSHU MISHRA" AND FROM STUDENT'S SIDE OPEN "PRIMARY CARE PHYSICIAN" THEN CHECK THE CHAT FEATURE
+
+
 
 2. Environment Variables: All the env files are provided publically
 
