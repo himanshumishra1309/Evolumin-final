@@ -1,11 +1,95 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, MessageCircle, ArrowLeft, Clock } from 'lucide-react';
-import SChat from './Chat/SChat';
-import SDdata from './Data/Data.json';
+import { User, MessageCircle, ArrowLeft, Clock, Send } from 'lucide-react';
 import { io } from 'socket.io-client';
 
 const socket = io.connect("http://localhost:3005");
+
+// Simulated chat data (replace with actual data fetching logic)
+const SDdata = [
+  { id: 1, name: "Dr. Smith", query: "General Consultation", time: "10:30 AM" },
+  { id: 2, name: "Dr. Johnson", query: "Cardiology", time: "11:45 AM" },
+  { id: 3, name: "Dr. Williams", query: "Pediatrics", time: "2:15 PM" },
+];
+
+const ChatBubble = ({ message, isUser }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+    className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
+  >
+    <div
+      className={`rounded-lg p-3 max-w-xs lg:max-w-md ${
+        isUser
+          ? 'bg-teal-600 text-white'
+          : 'bg-teal-100 text-teal-800'
+      }`}
+    >
+      <p>{message.text}</p>
+      <p className={`text-xs mt-1 ${isUser ? 'text-teal-200' : 'text-teal-600'}`}>
+        {message.time}
+      </p>
+    </div>
+  </motion.div>
+);
+
+const SChat = ({ handle, name, socket, room }) => {
+  const [message, setMessage] = useState('');
+  const [chatHistory, setChatHistory] = useState([
+    { text: `Hello! How can I assist you today?`, time: '10:30 AM', isUser: false },
+  ]);
+
+  const sendMessage = (e) => {
+    e.preventDefault();
+    if (message.trim()) {
+      const newMessage = { text: message, time: new Date().toLocaleTimeString(), isUser: true };
+      setChatHistory([...chatHistory, newMessage]);
+      socket.emit("send_message", { message, room });
+      setMessage('');
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-[calc(100vh-200px)]">
+      <div className="flex items-center mb-4">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={handle}
+          className="mr-4 p-2 rounded-full bg-teal-100 text-teal-600"
+        >
+          <ArrowLeft />
+        </motion.button>
+        <h2 className="text-2xl font-semibold text-teal-600">{name}</h2>
+      </div>
+      <div className="flex-grow overflow-y-auto mb-4 p-4 border border-teal-200 rounded-lg">
+        <AnimatePresence>
+          {chatHistory.map((msg, index) => (
+            <ChatBubble key={index} message={msg} isUser={msg.isUser} />
+          ))}
+        </AnimatePresence>
+      </div>
+      <form onSubmit={sendMessage} className="flex gap-2">
+        <input
+          type="text"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Type your message..."
+          className="flex-grow p-2 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+        />
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          type="submit"
+          className="p-2 bg-teal-600 text-white rounded-lg"
+        >
+          <Send />
+        </motion.button>
+      </form>
+    </div>
+  );
+};
 
 export default function DoctorAdvice() {
   const [chatVisible, setChatVisible] = useState(false);
