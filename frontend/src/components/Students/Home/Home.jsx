@@ -14,8 +14,7 @@ function Home() {
   const alertsRef = useRef(null);
 
   const scrollToSection = (ref) => {
-    ref.current.scrollIntoView({ behavior: 'smooth' });
-  };
+    ref.current.scrollIntoView({ behavior: 'smooth', block: 'start' });  };
 
   return (
     <>

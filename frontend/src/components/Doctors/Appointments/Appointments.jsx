@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { motion } from 'framer-motion';
+import { Calendar, Clock } from 'lucide-react';
 import Card from './Card/Card';
 import './scrollbar.css';
 
@@ -9,7 +11,6 @@ function Appointments() {
   const [uniqueDates, setUniqueDates] = useState([]);
   const doctorId = sessionStorage.getItem('doctorId');
 
-  // Fetch appointments for the logged-in doctor on component load
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
@@ -20,9 +21,8 @@ function Appointments() {
         const appointmentsData = response.data.data;
         setAppointments(appointmentsData);
 
-        // Extract unique dates from appointments
         const dates = Array.from(new Set(appointmentsData.map(appointment => appointment.date)));
-        setUniqueDates(dates.sort());  // Sort dates if needed
+        setUniqueDates(dates.sort());
 
       } catch (error) {
         console.error("Error fetching appointments:", error.response?.data?.message || error.message);
@@ -32,17 +32,14 @@ function Appointments() {
     fetchAppointments();
   }, [doctorId]);
 
-  // Handle date selection
   const handleDateChange = (e) => {
     setSelectedDate(e.target.value);
   };
 
-  // Filter appointments by selected date
   const filteredAppointments = selectedDate
     ? appointments.filter(appointment => appointment.date === selectedDate)
     : appointments;
 
-  // Sort filtered appointments by time
   const sortedAppointments = filteredAppointments.sort((a, b) => {
     const timeA = a.startTime.split(':').map(Number);
     const timeB = b.startTime.split(':').map(Number);
@@ -51,24 +48,36 @@ function Appointments() {
   });
 
   return (
-    <div className='m-8'>
-      <h1 className='m-6 mt-10 pt-6 text-4xl font-bold text-teal-600 mb-4 underline' style={{ fontFamily: 'Kaisei HarunoUmi, sans-serif' }}>Appointments</h1>
-      <div className='flex justify-end'>
-        <p className='text-2xl' style={{ fontFamily: 'Kaisei HarunoUmi, sans-serif' }}>Filter: </p>
-        <select className='w-auto border rounded-lg text-xl cursor-pointer' onChange={handleDateChange}>
-          <option className='cursor-pointer' value="" style={{ fontFamily: 'Kaisei HarunoUmi, sans-serif' }}>All</option>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className='m-8 bg-white rounded-lg shadow-lg p-6'
+    >
+      <h1 className='text-4xl font-bold text-teal-600 mb-8' style={{ fontFamily: 'Kaisei HarunoUmi, sans-serif' }}>
+        Appointments
+      </h1>
+      <div className='flex justify-end items-center mb-6'>
+        <Calendar className="mr-2 text-teal-600" />
+        <select 
+          className='w-auto border rounded-lg text-xl cursor-pointer p-2 focus:outline-none focus:ring-2 focus:ring-teal-500'
+          onChange={handleDateChange}
+          value={selectedDate}
+        >
+          <option value="">All Dates</option>
           {uniqueDates.map((date, index) => (
-            <option
-              key={index}
-              value={date}
-              style={{ fontFamily: 'Kaisei HarunoUmi, sans-serif' }}
-            >
-              {new Date(date).toDateString()}
+            <option key={index} value={date}>
+              {new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
             </option>
           ))}
         </select>
       </div>
-      <div className='w-full h-1/2 overflow-x-auto flex gap-4 p-4 scrollbar-custom'>
+      <motion.div 
+        className='w-full overflow-x-auto flex gap-4 p-4 scrollbar-custom'
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
         {sortedAppointments.length > 0 ? (
           sortedAppointments.map((appointment, index) => (
             <Card
@@ -81,10 +90,10 @@ function Appointments() {
             />
           ))
         ) : (
-          <p className="text-center text-gray-500">No Appointments Found</p>
+          <p className="text-center text-gray-500 text-xl w-full py-8">No Appointments Found</p>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
