@@ -81,15 +81,12 @@ function Home2() {
   Start Tour
 </button>
       <div id="appointments" ref={appointmentsRef} className="mb-8">
-        <h2 className="text-2xl font-bold text-teal-600 mb-4">Appointments</h2>
         <Appointments/>
       </div>
       <div id="queries" ref={queriesRef} className="mb-8">
-        <h2 className="text-2xl font-bold text-teal-600 mb-4">Queries</h2>
         <Queries/>
       </div>
       <div id='checkup' ref={checkupRef} className="mb-8">
-        <h2 className="text-2xl font-bold text-teal-600 mb-4">Monthly Checkups</h2>
         <MonthlyCheckup/>
       </div>
     </motion.div>
