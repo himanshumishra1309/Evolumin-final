@@ -30,7 +30,7 @@ export default function DoctorAdvice() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className='m-10 bg-gradient-to-r from-blue-50 to-white rounded-lg shadow-lg p-6'
+      className='m-10 bg-white p-6'
     >
       <h1 className='text-4xl font-bold text-teal-600 mb-8' style={{ fontFamily: 'Kaisei HarunoUmi, sans-serif' }}>
         Dr. Advice
